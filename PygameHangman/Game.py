@@ -13,14 +13,11 @@ class Game:
         self.won = False
 
     def start(self):
-        self.screen.display_start_screen()
-        while True:  # Wait for the Enter key to start the game
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    self.new_round()
+        if self.screen.display_start_screen():
+            self.new_round()
+        else:
+            pygame.quit()
+            return
 
     def new_round(self):
         self.game_over = False
@@ -34,14 +31,14 @@ class Game:
                     return
                 if event.type == pygame.KEYDOWN:
                     guess = event.unicode.lower()
-                    if guess.isalpha():
-                        self.game_loop(guess)
+                    self.game_loop(guess)
 
     def game_loop(self, guess):
-        if self.word_bank.is_already_guessed(guess):
-            self.screen.display_message("You've already guessed this letter!")
-        elif not self.word_bank.check_guess(guess):
-            self.player.wrong_guess()
+        if guess.isalpha():  # Check if the guess is a letter here
+            if self.word_bank.is_already_guessed(guess):
+                self.screen.display_message("You've already guessed this letter!")
+            elif not self.word_bank.check_guess(guess):
+                self.player.wrong_guess()
         if self.word_bank.all_guessed():
             self.won = True
             self.game_over = True
@@ -49,11 +46,18 @@ class Game:
             self.game_over = True
         if self.game_over:
             self.screen.display_end_screen(self.won, self.word_bank.get_word(), self.player)
-            pygame.time.wait(2000)
+            end_ticks = pygame.time.get_ticks()
+            while pygame.time.get_ticks() - end_ticks < 2000:  # Wait for 2 seconds while still processing events
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
             if self.screen.ask_restart():
                 self.new_round()
             else:
                 pygame.quit()
                 return
+
+            
         else:
             self.screen.display_game_screen(self.player, self.word_bank)
