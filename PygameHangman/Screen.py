@@ -4,6 +4,8 @@ from Hangman import Hangman
 # Define some constants
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+DARK_BLUE = (0, 0, 139)
+ORANGE = (255, 165, 0)
 
 
 class Screen:
@@ -16,11 +18,14 @@ class Screen:
         self.message_time = 0
 
     def display_start_screen(self):
-        self.DISPLAYSURF.fill(WHITE)
-        
-        title_text = self.font.render('Knotz WordGuess!', True, BLACK)
+        # Draw a gradient background
+        for i in range(self.DISPLAYSURF.get_height()):
+            color = max(0, 255 - i // 3)
+            pygame.draw.line(self.DISPLAYSURF, (color, color, 255), (0, i), (self.DISPLAYSURF.get_width(), i))
+
+        title_text = self.font.render('Knotz WordGuess!', True, DARK_BLUE)
         subtitle_text = self.font.render('Guess the word one letter at a time', True, BLACK)
-        instruction_text = self.font.render('Press Enter to start', True, BLACK)
+        instruction_text = self.font.render('Press Enter to start', True, ORANGE)
 
         title_text_rect = title_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 4))
         subtitle_text_rect = subtitle_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2))
@@ -39,7 +44,6 @@ class Screen:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
                         return True
-
 
     def display_message(self, message):
         self.message = message
@@ -60,20 +64,19 @@ class Screen:
         self.DISPLAYSURF.blit(guess_text, (50, 150))
         pygame.display.flip()
 
-
     def display_end_screen(self, won, word, player):
         self.DISPLAYSURF.fill((255, 255, 255))
         if won:
-            end_text = self.font.render("Congratulations, you won!", True, (10, 10, 10))
+            end_text = self.font.render("Congratulations, you won!", True, DARK_BLUE)
         else:
-            end_text = self.font.render("You did not make it. The word was " + word, True, (10, 10, 10))
+            end_text = self.font.render("You did not make it. The word was " + word, True, BLACK)
         end_text_rect = end_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2))
         self.DISPLAYSURF.blit(end_text, end_text_rect)
         pygame.display.flip()
 
     def ask_restart(self):
         self.DISPLAYSURF.fill((255, 255, 255))
-        restart_text = self.font.render("Would you like to play again? (yes/no)", True, (10, 10, 10))
+        restart_text = self.font.render("Would you like to play again? (yes/no)", True, ORANGE)
         restart_text_rect = restart_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2))
         self.DISPLAYSURF.blit(restart_text, restart_text_rect)
         pygame.display.flip()
@@ -88,4 +91,3 @@ class Screen:
                         return True
                     if event.unicode.lower() in ['n', 'no']:
                         return False
-
