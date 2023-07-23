@@ -1,9 +1,21 @@
+import csv
 import random
 
 class WordBank:
-    def __init__(self):
-        self.words = ["apple", "banana", "cherry", "date", "elderberry"]
+    def __init__(self, difficulty_level):
+        self.words = []
         self.word = ""
+        self.guesses = []
+        self.guessed_letters = []
+
+        # Load the words from the CSV file
+        with open('words.csv', 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if row[0] == difficulty_level:
+                    self.words = row[1:]
+
+    def reset(self):
         self.guesses = []
         self.guessed_letters = []
 

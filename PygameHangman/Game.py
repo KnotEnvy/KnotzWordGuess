@@ -1,4 +1,5 @@
 import pygame
+import traceback
 from Screen import Screen
 from WordBank import WordBank
 from Player import Player
@@ -7,13 +8,16 @@ class Game:
     def __init__(self):
         pygame.init()
         self.screen = Screen()
-        self.word_bank = WordBank()
         self.player = Player()
         self.game_over = False
         self.won = False
+        
+
 
     def start(self):
         if self.screen.display_start_screen():
+            difficulty_level = self.screen.display_difficulty_screen()
+            self.word_bank = WordBank(difficulty_level)
             self.new_round()
         else:
             pygame.quit()
@@ -27,8 +31,7 @@ class Game:
         while not self.game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
+                    self.quit_game()
                 if event.type == pygame.KEYDOWN:
                     guess = event.unicode.lower()
                     self.game_loop(guess)
@@ -50,14 +53,25 @@ class Game:
             while pygame.time.get_ticks() - end_ticks < 2000:  # Wait for 2 seconds while still processing events
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        pygame.quit()
-                        return
+                        self.quit_game()
             if self.screen.ask_restart():
                 self.new_round()
             else:
-                pygame.quit()
-                return
+                self.quit_game()
 
-            
         else:
             self.screen.display_game_screen(self.player, self.word_bank)
+
+    def quit_game(self):
+        pygame.quit()
+        exit()
+
+
+if __name__ == "__main__":
+    try:
+        game = Game()
+        game.start()
+    except Exception as e:
+        print(f"Sorry, something went wrong: {e}")
+        traceback.print_exc()  # Print the full stack trace
+        pygame.quit()

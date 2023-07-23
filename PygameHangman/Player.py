@@ -3,7 +3,12 @@ class Player:
         self.wrong_guesses = 0
 
     def guess(self):
-        return input("Please enter a letter: ")
+        while True:
+            guess = input("Please enter a letter: ")
+            if guess.isalpha() and len(guess) == 1:
+                return guess.lower()
+            else:
+                print("Invalid input. Please enter a single letter.")
 
     def wrong_guess(self):
         self.wrong_guesses += 1

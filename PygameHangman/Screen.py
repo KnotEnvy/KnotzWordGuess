@@ -1,5 +1,7 @@
 import pygame
 from Hangman import Hangman
+from Text import Text  # New class for animated text
+from MissedLettersDisplay import MissedLettersDisplay
 
 # Define some constants
 BLACK = (0, 0, 0)
@@ -7,25 +9,29 @@ WHITE = (255, 255, 255)
 DARK_BLUE = (0, 0, 139)
 ORANGE = (255, 165, 0)
 
-
 class Screen:
     def __init__(self):
+        pygame.font.init()
         self.DISPLAYSURF = pygame.display.set_mode((600, 800), pygame.RESIZABLE)
         pygame.display.set_caption('Knotz WordGuess')
         self.font = pygame.font.Font(None, 36)
         self.hangman = Hangman(self.DISPLAYSURF)
-        self.message = ""
-        self.message_time = 0
-
+        
+        self.message = Text("", 36, (50, 50), (10, 10, 10), self.DISPLAYSURF)
+        self.missed_letters_display = MissedLettersDisplay(self.DISPLAYSURF, (50, 200), (255, 0, 0), 40)
     def display_start_screen(self):
         # Draw a gradient background
         for i in range(self.DISPLAYSURF.get_height()):
             color = max(0, 255 - i // 3)
             pygame.draw.line(self.DISPLAYSURF, (color, color, 255), (0, i), (self.DISPLAYSURF.get_width(), i))
 
-        title_text = self.font.render('Knotz WordGuess!', True, DARK_BLUE)
-        subtitle_text = self.font.render('Guess the word one letter at a time', True, BLACK)
-        instruction_text = self.font.render('Press Enter to start', True, ORANGE)
+        title_font = pygame.font.Font("Fonarto.ttf", 48)
+        subtitle_font = pygame.font.Font("Fonarto.ttf", 36)
+        instruction_font = pygame.font.Font("Fonarto.ttf", 24)
+
+        title_text = title_font.render('Knotz WordGuess!', True, DARK_BLUE)
+        subtitle_text = subtitle_font.render('Guess the word one letter at a time', True, BLACK)
+        instruction_text = instruction_font.render('Press Enter to start', True, ORANGE)
 
         title_text_rect = title_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 4))
         subtitle_text_rect = subtitle_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2))
@@ -45,9 +51,76 @@ class Screen:
                     if event.key == pygame.K_RETURN:
                         return True
 
+    def display_difficulty_screen(self):
+        # Draw a gradient background
+        for i in range(self.DISPLAYSURF.get_height()):
+            color = max(0, 255 - i // 3)
+            pygame.draw.line(self.DISPLAYSURF, (color, color, 255), (0, i), (self.DISPLAYSURF.get_width(), i))
+
+        title_font = pygame.font.Font("Fonarto.ttf", 48)
+        option_font = pygame.font.Font("Fonarto.ttf", 30)
+
+        title_text = title_font.render('Select Level', True, DARK_BLUE)
+        easy_text = option_font.render('1. Easy', True, BLACK)
+        medium_text = option_font.render('2. Medium', True, BLACK)
+        hard_text = option_font.render('3. Hard', True, BLACK)
+        expert_text = option_font.render('4. Biggest Words Ever', True, BLACK)
+        animal_text = option_font.render('5. Animals', True, BLACK)
+        color_text = option_font.render('6. Colors', True, BLACK)
+        country_text = option_font.render('7. Countries', True, BLACK)
+        state_text = option_font.render('8. States', True, BLACK)
+
+        title_text_rect = title_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 4-50))
+        easy_text_rect = easy_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2 - 100))
+        medium_text_rect = medium_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2-50))
+        hard_text_rect = hard_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2))
+        expert_text_rect = expert_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2 + 50))
+        animal_text_rect = animal_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2 + 100))
+        color_text_rect = color_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2 + 150))
+        country_text_rect = country_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2 + 200))
+        state_text_rect = state_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 2 + 250))
+
+        self.DISPLAYSURF.blit(title_text, title_text_rect)
+        self.DISPLAYSURF.blit(easy_text, easy_text_rect)
+        self.DISPLAYSURF.blit(medium_text, medium_text_rect)
+        self.DISPLAYSURF.blit(hard_text, hard_text_rect)
+        self.DISPLAYSURF.blit(expert_text, expert_text_rect)
+        self.DISPLAYSURF.blit(animal_text, animal_text_rect)
+        self.DISPLAYSURF.blit(color_text, color_text_rect)
+        self.DISPLAYSURF.blit(country_text, country_text_rect)
+        self.DISPLAYSURF.blit(state_text, state_text_rect)
+
+        pygame.display.flip()
+
+        # Variable to keep track of the user's choice
+        selected_difficulty = None
+
+        while selected_difficulty is None:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        selected_difficulty = 'easy'
+                    elif event.key == pygame.K_2:
+                        selected_difficulty = 'medium'
+                    elif event.key == pygame.K_3:
+                        selected_difficulty = 'hard'
+                    elif event.key == pygame.K_4:
+                        selected_difficulty = 'expert'
+                    elif event.key == pygame.K_5:
+                        selected_difficulty = 'animals'
+                    elif event.key == pygame.K_6:
+                        selected_difficulty = 'colors'
+                    elif event.key == pygame.K_7:
+                        selected_difficulty = 'countries'
+                    elif event.key == pygame.K_8:
+                        selected_difficulty = 'states'
+
+        return selected_difficulty
+
     def display_message(self, message):
-        self.message = message
-        self.message_time = pygame.time.get_ticks()
+        self.message.set_text(message)  # Use the new Text class to set the message
 
     def display_game_screen(self, player, word_bank):
         self.DISPLAYSURF.fill((255, 255, 255))
@@ -56,12 +129,22 @@ class Screen:
 
         # Adjust font size based on the length of the word
         font_size = min(36, self.DISPLAYSURF.get_width() // len(word_bank.get_display_word()))
-        font = pygame.font.Font(None, font_size)
+        font = pygame.font.Font("Fonarto.ttf", font_size)
 
-        word_text = font.render(word_bank.get_display_word(), True, (10, 10, 10))
-        guess_text = self.font.render("Wrong guesses: " + str(player.get_wrong_guesses()), True, (10, 10, 10))
-        self.DISPLAYSURF.blit(word_text, (50, 100))
+        # Use the updated Text class with color and surface arguments
+        word_text = Text(word_bank.get_display_word(), font_size, (50, 100), (10, 10, 10), self.DISPLAYSURF)
+        guess_text = font.render("Wrong guesses: " + str(player.get_wrong_guesses()), True, (10, 10, 10))
+
+        word_text.update_animation()  # Update text animation
+        word_text.draw()  # Draw the updated text
         self.DISPLAYSURF.blit(guess_text, (50, 150))
+
+        # Update and draw missed letters display in a unique way
+        missed_letters = ", ".join(word_bank.guessed_letters)
+        missed_text = font.render("Missed letters: " + missed_letters, True, (255, 0, 0))
+        missed_text_rect = missed_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() - 50))
+        self.DISPLAYSURF.blit(missed_text, missed_text_rect)
+
         pygame.display.flip()
 
     def display_end_screen(self, won, word, player):
