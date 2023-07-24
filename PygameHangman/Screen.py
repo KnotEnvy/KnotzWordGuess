@@ -20,10 +20,25 @@ class Screen:
         self.message = Text("", 36, (50, 50), (10, 10, 10), self.DISPLAYSURF)
         self.missed_letters_display = MissedLettersDisplay(self.DISPLAYSURF, (50, 200), (255, 0, 0), 40)
     def display_start_screen(self):
-        # Draw a gradient background
-        for i in range(self.DISPLAYSURF.get_height()):
+        # Draw a gradient sky
+        for i in range(self.DISPLAYSURF.get_height() // 2):
             color = max(0, 255 - i // 3)
             pygame.draw.line(self.DISPLAYSURF, (color, color, 255), (0, i), (self.DISPLAYSURF.get_width(), i))
+
+        # Draw a gradient icy ground
+        for i in range(self.DISPLAYSURF.get_height() // 2, self.DISPLAYSURF.get_height()):
+            color = max(0, 255 - (self.DISPLAYSURF.get_height() - i) // 3)
+            pygame.draw.line(self.DISPLAYSURF, (color, color, 255), (0, i), (self.DISPLAYSURF.get_width(), i))
+
+        # Draw snow-capped mountains
+        pygame.draw.polygon(self.DISPLAYSURF, (255, 255, 255), [(0, self.DISPLAYSURF.get_height() // 2),
+                                                                 (self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() // 4),
+                                                                 (self.DISPLAYSURF.get_width(), self.DISPLAYSURF.get_height() // 2)])
+
+        # Draw icicles hanging from the top of the screen
+        for i in range(0, self.DISPLAYSURF.get_width(), 30):
+            pygame.draw.polygon(self.DISPLAYSURF, (255, 255, 255), [(i, 0), (i + 15, 30), (i + 30, 0)])
+
 
         title_font = pygame.font.Font("Fonarto.ttf", 48)
         subtitle_font = pygame.font.Font("Fonarto.ttf", 36)
@@ -122,29 +137,35 @@ class Screen:
     def display_message(self, message):
         self.message.set_text(message)  # Use the new Text class to set the message
 
-    def display_game_screen(self, player, word_bank):
+    def display_game_screen(self, player, word_bank, guess):
+        # Fill the screen with white
         self.DISPLAYSURF.fill((255, 255, 255))
-        # Draw hangman
+
+        # Draw the hangman based on the player's wrong guesses
         self.hangman.draw(player.get_wrong_guesses())
 
-        # Adjust font size based on the length of the word
+        # Adjust the font size based on the length of the word
         font_size = min(36, self.DISPLAYSURF.get_width() // len(word_bank.get_display_word()))
         font = pygame.font.Font("Fonarto.ttf", font_size)
 
-        # Use the updated Text class with color and surface arguments
+        # Render the word and guess texts
         word_text = Text(word_bank.get_display_word(), font_size, (50, 100), (10, 10, 10), self.DISPLAYSURF)
-        guess_text = font.render("Wrong guesses: " + str(player.get_wrong_guesses()), True, (10, 10, 10))
+        guess_text = font.render(f"Your guess: {guess}", True, (10, 10, 10))
 
-        word_text.update_animation()  # Update text animation
-        word_text.draw()  # Draw the updated text
+        # Update text animation and draw the updated text
+        word_text.update_animation()
+        word_text.draw()
+
+        # Display the word and guess texts
         self.DISPLAYSURF.blit(guess_text, (50, 150))
 
-        # Update and draw missed letters display in a unique way
+        # Update and draw the missed letters display
         missed_letters = ", ".join(word_bank.guessed_letters)
         missed_text = font.render("Missed letters: " + missed_letters, True, (255, 0, 0))
         missed_text_rect = missed_text.get_rect(center=(self.DISPLAYSURF.get_width() // 2, self.DISPLAYSURF.get_height() - 50))
         self.DISPLAYSURF.blit(missed_text, missed_text_rect)
 
+        # Update the display
         pygame.display.flip()
 
     def display_end_screen(self, won, word, player):

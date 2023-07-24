@@ -60,7 +60,8 @@ class Game:
                 self.quit_game()
 
         else:
-            self.screen.display_game_screen(self.player, self.word_bank)
+            self.screen.display_game_screen(self.player, self.word_bank, guess)
+
 
     def quit_game(self):
         pygame.quit()
